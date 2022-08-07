@@ -32,3 +32,9 @@ I didn't bake in versioning from the start. Or least I don't remember how or if 
 git add remote production app@fieldassistant.app:migration
 git push production master
 ```
+
+
+## Notes
+
+- Fix SW hijacking the migration script
+- Some notes about migration behaviour for users

@@ -15,14 +15,19 @@
     const entries = localStorage.getItem('persist:entries');
 
     if (data && entries) {
-        let ok = confirm('Entries exist, override?');
+        const {timestamp: updated} = JSON.parse(data);
+        const {timestamp: current} = JSON.parse(entries);
 
-        if (ok) {
-            ok = confirm('Are you sure?');
-        }
+        if (updated > current) {
+            let ok = confirm('Entries exist, override?');
 
-        if (ok) {
-            localStorage.setItem('persist:entries', data);
+            if (ok) {
+                ok = confirm('Are you sure?');
+            }
+
+            if (ok) {
+                localStorage.setItem('persist:entries', data);
+            }
         }
     }
 

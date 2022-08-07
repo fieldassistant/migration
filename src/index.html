@@ -76,11 +76,9 @@
 
             log.innerText += "Migrating...\n";
 
-            setTimeout(() => {
-                log.innerText += "Sending...\n";
-                migrate.data.value = JSON.stringify(store);
-                migrate.submit();
-            }, 500);
+            log.innerText += "Sending...\n";
+            migrate.data.value = JSON.stringify(store);
+            migrate.submit();
         }
         else {
             // DO DEBUGGING HERE.

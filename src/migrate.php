@@ -8,6 +8,7 @@
 </head>
 <body>
 <h1>Please wait... (2/2)</h1>
+<pre id="log"></pre>
 <script id="migrate" type="application/json"><?php echo $_POST['data'] ?? '{"timestamp":0}' ?></script>
 <script>
 !function() {
@@ -19,15 +20,19 @@
         entries = JSON.parse(store);
     }
     catch (error) {
+        log.innerText += error.message + "\n";
         console.log(error);
     }
 
     // Only do things if we have new data.
     if (data.timestamp) {
+        log.innerText += "Received migration data\n";
+
         let ok = true;
 
         // We're going to overwrite something.
         if (entries.timestamp) {
+            log.innerText += "Found existing data\n";
 
             // But only ask if we've got newer data.
             if (data.timestamp > entries.timestamp) {
@@ -49,7 +54,11 @@
         }
 
         if (ok) {
+            log.innerText += "Writing data\n";
             localStorage.setItem('persist:entries', JSON.stringify(data));
+        }
+        else {
+            log.innerText += "Skip migration\n";
         }
     }
 

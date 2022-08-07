@@ -8,26 +8,48 @@
 </head>
 <body>
 <h1>Please wait... (2/2)</h1>
-<script id="migrate" type="application/json"><?php echo $_POST['data'] ?? 'null' ?></script>
+<script id="migrate" type="application/json"><?php echo $_POST['data'] ?? '{"timestamp":0}' ?></script>
 <script>
 !function() {
-    const data = migrate.innerHTML;
-    const entries = localStorage.getItem('persist:entries');
+    const data = JSON.parse(migrate.innerHTML);
+    let entries = {timestamp: 0};
 
-    if (data && entries) {
-        const {timestamp: updated} = JSON.parse(data);
-        const {timestamp: current} = JSON.parse(entries);
+    try {
+        const store = localStorage.getItem('persist:entries');
+        entries = JSON.parse(store);
+    }
+    catch (error) {
+        console.log(error);
+    }
 
-        if (updated > current) {
-            let ok = confirm('Entries exist, override?');
+    // Only do things if we have new data.
+    if (data.timestamp) {
+        let ok = true;
 
-            if (ok) {
-                ok = confirm('Are you sure?');
+        // We're going to overwrite something.
+        if (entries.timestamp) {
+
+            // But only ask if we've got newer data.
+            if (data.timestamp > entries.timestamp) {
+                ok = confirm('Entries exist, override?');
+
+                if (ok) {
+                    ok = confirm('Are you sure?');
+                }
             }
-
-            if (ok) {
-                localStorage.setItem('persist:entries', data);
+            // Otherwise we're not overwriting. Existing data is already newer
+            // so assume the migration already worked.
+            else {
+                ok = false;
             }
+        }
+        // There's no existing data, write in our new stuff.
+        else {
+            ok = true;
+        }
+
+        if (ok) {
+            localStorage.setItem('persist:entries', JSON.stringify(data));
         }
     }
 

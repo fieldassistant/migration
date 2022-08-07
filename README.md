@@ -24,3 +24,11 @@ I didn't bake in versioning from the start. Or least I don't remember how or if 
 6. A redirect/refresh into to the (new) PWA root hydrates the data into the app.
 7. ???
 8. profit.
+
+
+## Deploy
+
+```
+git add remote production app@fieldassistant.app:migration
+git push production master
+```

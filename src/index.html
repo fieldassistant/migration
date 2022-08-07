@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Field Assistant Migration</title>
+</head>
+<body>
+<h1>Please wait... (1/2)</h1>
+<pre id="log"></pre>
+<form name="migrate" method="POST" action="https://pwa.fieldassistant.app/migrate.php">
+    <input type="hidden" name="data" value="">
+</form>
+<script>
+!function() {
+    try {
+        log.innerText += "Ready\n";
+        const store = JSON.parse(localStorage.getItem('persist:entries') || 'null');
+        if (store) {
+            log.innerText += "Found entries\n";
+
+            if (!store.fields && store.entries) {
+                log.innerText += "Found type 1\n";
+                log.innerText += "Processing...\n";
+
+                // Decode it.
+                store.entries = JSON.parse(store.entries);
+
+                // Convert it.
+                const entries = {};
+                for (let [key, entry] of Object.entries(store.entries)) {
+                    entries[key] = {
+                        entry_id: entry.entry_id,
+                        position: entry.position,
+                        voucher: entry.voucher,
+                        collector: entry.collector,
+                        data: {
+                            'Specimen Type': entry.specimen_type,
+                            'Specimen Count': entry.specimen_count,
+                            'State/Territory': entry.state,
+                            'Location': entry.location,
+                            'Method': entry.method,
+                            'Flower/Host Plant': entry.host_plant,
+                            'Notes': entry.notes,
+                        },
+                    };
+                }
+
+                // Re-encode it.
+                store.entries = JSON.stringify(entries);
+
+                // Create default fields.
+                store.fields = JSON.stringify([
+                    { name: 'Specimen Type', type: 'string', placeholder: 'Wasp'  },
+                    { name: 'Specimen Count', type: 'integer', placeholder: '2' },
+                    { name: 'State/Territory', type: 'string', placeholder: 'WA' },
+                    { name: 'Location', type: 'string', placeholder: '5km N' },
+                    { name: 'Method', type: 'string', placeholder: 'General sweep' },
+                    { name: 'Flower/Host Plant', type: 'string', placeholder: 'Eucalyptus' },
+                    { name: 'Notes', type: 'string', placeholder: '...' },
+                ]);
+
+                // Edit the store version.
+                store._persist = JSON.parse(store._persist);
+                store._persist.version = 2;
+                store._persist = JSON.stringify(store._persist);
+            }
+            else if (store.fields && store.entries) {
+                log.innerText += "Found type 2\n";
+            }
+            else {
+                console.log(store);
+                throw new Error('Unknown store type');
+            }
+
+            log.innerText += "Migrating...\n";
+
+            setTimeout(() => {
+                log.innerText += "Sending...\n";
+                migrate.data.value = JSON.stringify(store);
+                migrate.submit();
+            }, 500);
+        }
+        else {
+            // DO DEBUGGING HERE.
+            location.assign('https://pwa.fieldassistant.app');
+        }
+    }
+    catch (error) {
+        log.innerText += "Error: " + error.message + "\n";
+
+        // Something for the user to take away.
+        const dump = document.createElement('pre');
+        dump.style.whiteSpace = 'pre-wrap';
+        dump.innerHTML = localStorage.getItem('persist:entries');
+        document.body.appendChild(dump);
+    }
+}();
+</script>
+</body>
+</html>
